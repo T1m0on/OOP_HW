@@ -69,7 +69,6 @@ class Mentor(Person):
 class Lecturer(Mentor):
     def __init__(self, name, surname):
         super().__init__(name, surname)
-        self.grades = {}
         all_lectures.append(self)
 
     def __str__(self):
@@ -165,10 +164,3 @@ best_student.rate_mentor(cool_lecturer, 'Python', 2)
 best_student.rate_mentor(second_cool_lecturer, 'Python', 10)
 best_student.rate_mentor(second_cool_lecturer, 'Git', 9)
 best_student.rate_mentor(second_cool_lecturer, 'Python', 2)
-
-print(get_all_studs_grades())
-
-
-
-
-
