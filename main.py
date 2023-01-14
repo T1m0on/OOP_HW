@@ -7,6 +7,20 @@ class Person:
     def __init__(self, name, surname):
         self.name = name
         self.surname = surname
+        self.grades = {}
+        self.average_grades = ''
+
+    def get_all_average_grade(self):
+        grades = []
+        for v in self.grades.values():
+            grades += v
+        return mean(grades)
+
+    def get_average_grade_per_course(self):
+        average_grade_per_course = {}
+        for key, value in self.grades.items():
+           average_grade_per_course[key] = value
+        return average_grade_per_course
 
 class Student(Person):
 
@@ -15,25 +29,26 @@ class Student(Person):
         self.gender = gender
         self.finished_courses = []
         self.courses_in_progress = []
-        self.grades = {}
         all_students.append(self)
 
-
-    def get_average_grade(self):
-        average_grade_per_course = str()
-        for key, value in self.grades.items():
-           average_grade_per_course += f'Средняя оценка по предмету {key}: {mean(value)}\n'
-        return average_grade_per_course
-
     def __str__(self):
-        courses = ''
+        courses = []
         finished_courses = ''
         for i in self.courses_in_progress:
-            courses += f'{i} '
+            courses.append(i)
         for i in self.finished_courses:
             finished_courses += f'{i} '
-        return f'\nИмя: {self.name} \nФамилия: {self.surname}\n{self.get_average_grade()}Курсы в процессе изучения: {courses}\n' \
-               f'Завершенные курсы: {finished_courses if False else "Еще не закончил, но все впереди"}\n'
+        for k, v in self.get_average_grade_per_course().items():
+            self.average_grades += f'Средний бал по предмету {k}: {mean(v)}\n'
+        return f'\nИмя: {self.name} \nФамилия: {self.surname}\n{self.average_grades}' \
+               f'Курсы в процессе изучения: {", ".join(courses)}\n' \
+               f'Завершенные курсы: {finished_courses}\n'
+
+    def __ge__(self, other):
+        return self.get_all_average_grade() >= other.get_all_average_grade()
+
+    def __le__(self, other):
+        return self.get_all_average_grade() <= other.get_all_average_grade()
 
     def rate_mentor(self, lecturer, course, grade):
         if isinstance(lecturer, Lecturer) and course in lecturer.courses_attached and course in self.courses_in_progress:
@@ -56,17 +71,17 @@ class Lecturer(Mentor):
         super().__init__(name, surname)
         self.grades = {}
         all_lectures.append(self)
-    def get_average_grade(self):
-        average_grades = ''
-        for key, value in self.grades.items():
-            average_grades += f'Средняя оценка по предмету {key}: {mean(value)}\n'
-        return average_grades
-
-
 
     def __str__(self):
-        return f'\nИмя: {self.name} \nФамилия: {self.surname}\n{self.get_average_grade()}'
+        for k, v in self.get_average_grade_per_course().items():
+            self.average_grades += f'Средний бал по предмету {k}: {mean(v)}\n'
+        return f'\nИмя: {self.name} \nФамилия: {self.surname}\n{self.average_grades}'
 
+    def __ge__(self, other):
+        return self.get_all_average_grade() >= other.get_all_average_grade()
+
+    def __le__(self, other):
+        return self.get_all_average_grade() <= other.get_all_average_grade()
 
 
 class Reviewer(Mentor):
@@ -84,6 +99,26 @@ class Reviewer(Mentor):
 
     def __str__(self):
         return f'Имя: {self.name} \nФамилия: {self.surname}'
+
+
+def get_all_studs_grades(students=all_students, course='Python'):
+    res = []
+    for student in students:
+        if course in student.grades.keys():
+            for i in student.grades.values():
+                res += i
+            return f'Средняя отметка всех студентов по предмету {course}: {mean(res)}'
+
+
+def get_all_lectures_grades(lectures=all_lectures, course='Python'):
+    res = []
+    for lecture in lectures:
+        if course in lecture.grades.keys():
+            for i in lecture.grades.values():
+                res += i
+            return f'Средняя отметка всех лекторов по предмету {course}: {mean(res)}'
+        else:
+            return 'Оценок еще нет'
 
 
 #Тесты
@@ -131,27 +166,8 @@ best_student.rate_mentor(second_cool_lecturer, 'Python', 10)
 best_student.rate_mentor(second_cool_lecturer, 'Git', 9)
 best_student.rate_mentor(second_cool_lecturer, 'Python', 2)
 
+print(get_all_studs_grades())
 
-def get_all_studs_grades(students, course='Python'):
-    res = []
-    for student in students:
-        if course in student.grades.keys():
-            for i in student.grades.values():
-                res += i
-            return f'Средняя отметка всех студентов по предмету {course}: {mean(res)}'
-    else:
-        return 'Еще никто не закончил'
-
-
-def get_all_lectures_grades(lectures, course='Python'):
-    res = []
-    for lectur in lectures:
-        if course in lectur.grades.keys():
-            for i in lectur.grades.values():
-                res += i
-            return f'Средняя отметка всех лекторов по предмету {course}: {mean(res)}'
-        else:
-            return 'Оценок еще нет'
 
 
 
